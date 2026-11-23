@@ -1,0 +1,9 @@
+// LAB - PowerShell 4104 Detection Test
+// Sentinel scheduled analytics rule · Event ID 4104 · MITRE ATT&CK T1059.001
+// Runs every 5 minutes, looks back 5 minutes, alerts on > 0 results
+// Requires: PowerShell Script Block Logging (GPO)
+Event
+| where EventID == 4104
+| where Computer == "vm-dc01.ad.lab"
+| where RenderedDescription contains "PurpleTeam-4104-Detection-Test"
+| project TimeGenerated, Computer, EventID, RenderedDescription

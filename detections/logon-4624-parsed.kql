@@ -1,0 +1,11 @@
+// Parse successful logons (4624) from RenderedDescription
+// Used to verify a controlled Bastion logon: expected LogonType 10 (RemoteInteractive)
+Event
+| where Computer startswith "vm-win11-01"
+| where EventID == 4624
+| where TimeGenerated > ago(30m)
+| extend LogonType = extract(@"Logon Type:\s+(\d+)", 1, RenderedDescription)
+| extend AccountName = extract(@"New Logon:[\s\S]*?Account Name:\s+(.+?)\s+Account Domain:", 1, RenderedDescription)
+| extend AccountDomain = extract(@"New Logon:[\s\S]*?Account Domain:\s+(.+?)\s+Logon ID:", 1, RenderedDescription)
+| project TimeGenerated, Computer, AccountDomain, AccountName, LogonType, EventID
+| sort by TimeGenerated desc

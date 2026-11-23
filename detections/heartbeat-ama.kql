@@ -1,0 +1,5 @@
+// Verify that Azure Monitor Agent is communicating with the workspace
+// Expected: recurring rows with Category "Azure Monitor Agent"
+Heartbeat
+| where Computer == "vm-win11-01.ad.lab"
+| take 10

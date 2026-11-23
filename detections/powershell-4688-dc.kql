@@ -1,0 +1,14 @@
+// Lab v2 - labadmin starts PowerShell on DC
+// Defender XDR custom detection · Event ID 4688 · MITRE ATT&CK T1059.001
+// Requires: audit process creation + "Include command line in process creation events"
+Event
+| where Computer startswith "vm-dc01"
+| where EventID == 4688
+| extend AccountName = extract(@"Account Name:\s+(.+?)\s+Account Domain:", 1, RenderedDescription)
+| extend NewProcessName = extract(@"New Process Name:\s+(.+?)\s+Token Elevation Type:", 1, RenderedDescription)
+| where AccountName == "labadmin"
+| where NewProcessName endswith @"\powershell.exe"
+// Columns used by entity mapping (Device -> HostName + DnsDomain)
+| extend HostName = tostring(split(Computer, ".")[0])
+| extend DnsDomain = strcat_array(array_slice(split(Computer, "."), 1, -1), ".")
+| project TimeGenerated, Computer, HostName, DnsDomain, AccountName, NewProcessName

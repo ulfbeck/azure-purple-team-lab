@@ -1,0 +1,15 @@
+// LAB - Azure RBAC Role Assignment Change
+// Defender XDR custom detection · AzureActivity
+// Runs every 5 minutes, looks back 5 minutes
+AzureActivity
+| where OperationNameValue in (
+    "MICROSOFT.AUTHORIZATION/ROLEASSIGNMENTS/WRITE",
+    "MICROSOFT.AUTHORIZATION/ROLEASSIGNMENTS/DELETE"
+)
+| where ActivityStatusValue == "Success"
+| project
+    TimeGenerated,
+    OperationNameValue,
+    Caller,
+    ResourceGroup,
+    CorrelationId
