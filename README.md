@@ -16,46 +16,41 @@ I don't want to just get things working. I want to be able to explain, for every
 ## Architecture
 
 ```mermaid
-flowchart TB
+flowchart LR
     admin([My workstation]) -->|HTTPS| bastion[Azure Bastion<br/>Developer SKU]
-    internet((Internet))
 
-    subgraph vnet["vnet-lab-purpleteam · 10.0.0.0/24 · Sweden Central"]
-        subgraph mgmt["Management · 10.0.0.128/27"]
-            dc["vm-dc01 · 10.0.0.132<br/>Windows Server 2025<br/>AD DS + DNS (ad.lab)"]
+    subgraph vnet["vnet-lab-purpleteam · 10.0.0.0/24"]
+        direction TB
+        subgraph att["Attacker · 10.0.0.192/28 · nsg-attacker"]
+            kali["vm-kali-01<br/>10.0.0.196<br/>Kali Linux"]
         end
         subgraph ep["Endpoints · 10.0.0.64/26 · nsg-endpoints"]
-            win["vm-win11-01 · 10.0.0.68<br/>Windows 11 Pro<br/>domain-joined"]
+            win["vm-win11-01<br/>10.0.0.68<br/>Windows 11"]
         end
-        subgraph att["Attacker · 10.0.0.192/28 · nsg-attacker"]
-            kali["vm-kali-01 · 10.0.0.196<br/>Kali Linux 2026.2"]
+        subgraph mgmt["Management · 10.0.0.128/27"]
+            dc["vm-dc01<br/>10.0.0.132<br/>AD DS + DNS"]
         end
     end
 
-    bastion -->|RDP 3389| dc
-    bastion -->|RDP 3389| win
-    bastion -->|SSH 22| kali
-
+    bastion -->|SSH| kali
+    bastion -->|RDP| win
+    bastion -->|RDP| dc
     win -->|DNS, Kerberos, LDAP| dc
-    win -. "RDP denied" .-x dc
-    kali -. "denied (baseline)" .-x dc
-    kali -. "denied (baseline)" .-x win
 
-    mgmt --> natgw[NAT Gateway<br/>natgw-lab-purpleteam]
-    ep --> natgw
-    natgw --> internet
-    kali -. "denied" .-x internet
+    win --> natgw[NAT Gateway]
+    dc --> natgw
+    natgw --> internet((Internet))
 
     subgraph soc["Logging and detection"]
-        law[(Log Analytics<br/>law-lab-purpleteam)]
-        sentinel[Microsoft Sentinel]
-        xdr[Defender portal<br/>alerts and incidents]
-        law --> sentinel --> xdr
+        direction TB
+        law[(Log Analytics)] --> sentinel[Microsoft Sentinel] --> xdr[Defender portal<br/>alerts and incidents]
     end
 
-    dc -->|AMA + DCR| law
-    win -->|AMA + DCR| law
+    win -->|AMA| law
+    dc -->|AMA| law
 ```
+
+Only allowed flows are shown. Kali has no outbound internet access, and blocked flows between the zones are listed in [Verified traffic flows](#verified-traffic-flows).
 
 | Component | Configuration | Purpose |
 | --- | --- | --- |
