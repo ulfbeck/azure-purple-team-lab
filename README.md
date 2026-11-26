@@ -10,6 +10,8 @@ I don't want to just get things working. I want to be able to explain, for every
 - how an activity is detected, and how I verified that the detection actually works
 
 > **Scope:** This is a lab environment. Everything described here was built and tested in my own Azure subscription. A test only proves the specific flow, port or event that was tested, so the documentation says exactly what was verified and what wasn't.
+>
+> **Status:** The Azure environment has been decommissioned to avoid ongoing costs. The documentation, KQL queries and screenshots describe the lab as it was built and tested in September–October 2026.
 
 ---
 
